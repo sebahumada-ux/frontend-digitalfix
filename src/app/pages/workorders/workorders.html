@@ -1,0 +1,62 @@
+<section class="workorders-page">
+
+  <h2>Órdenes de trabajo</h2>
+
+  @if (cargando()) {
+    <p>Cargando órdenes...</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (!cargando() && !error()) {
+
+    @if (ordenes().length === 0) {
+      <p>No hay órdenes de trabajo registradas.</p>
+    }
+
+    @for (orden of ordenes(); track orden.id) {
+
+      <article class="workorder-card">
+
+        <div class="header">
+          <h3>Orden #{{ orden.id }}</h3>
+          <span class="estado">{{ orden.estado }}</span>
+        </div>
+
+        <p>
+          <strong>Cliente:</strong>
+          {{ orden.clienteId }}
+        </p>
+
+        <p>
+          <strong>Descripción:</strong>
+          {{ orden.descripcion }}
+        </p>
+
+        <p>
+          <strong>Dirección:</strong>
+          {{ orden.direccion }}
+        </p>
+
+        <p>
+          <strong>Técnico:</strong>
+          {{ orden.tecnicoId ?? 'Sin asignar' }}
+        </p>
+
+        <p>
+          <strong>Fecha de creación:</strong>
+          {{ formatearFecha(orden.fechaCreacion) }}
+        </p>
+
+        <p>
+          <strong>Última actualización:</strong>
+          {{ formatearFecha(orden.fechaActualizacion) }}
+        </p>
+
+      </article>
+    }
+  }
+
+</section>
