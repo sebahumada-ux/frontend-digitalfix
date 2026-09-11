@@ -1,7 +1,10 @@
 <div class="page">
+
   <div class="card">
 
-    <h1>DigitalFix</h1>
+    <h1>
+      DigitalFix
+    </h1>
 
     <p class="subtitle">
       Plataforma de gestión de órdenes de trabajo
@@ -11,30 +14,39 @@
 
       <button
         class="primary-button"
-        (click)="login()">
+        (click)="login()"
+      >
         Iniciar sesión con Microsoft
       </button>
-
     }
 
     @if (isLoggedIn()) {
 
       <div class="session-box">
 
-        <p>Sesión iniciada como:</p>
+        <p>
+          Sesión iniciada como:
+        </p>
 
-        <strong>{{ username() }}</strong>
+        <strong>
+          {{ username() }}
+        </strong>
 
         @if (roles().length > 0) {
+
           <p>
-            <strong>Rol:</strong>
+            <strong>
+              Rol:
+            </strong>
+
             {{ roles()[0] }}
           </p>
         }
 
         <button
           class="secondary-button"
-          (click)="logout()">
+          (click)="logout()"
+        >
           Cerrar sesión
         </button>
 
@@ -42,27 +54,49 @@
 
       <div class="navigation">
 
-        @if (tieneRol('Admin', 'Supervisor', 'Cliente')) {
+        <a
+          class="nav-button"
+          href="/dashboard"
+        >
+          Dashboard
+        </a>
+
+        @if (
+          tieneRol(
+            'Admin',
+            'Supervisor',
+            'Cliente'
+          )
+        ) {
+
           <a
             class="nav-button"
-            href="/workorders">
+            href="/workorders"
+          >
             Órdenes de trabajo
           </a>
         }
 
-        @if (tieneRol('Admin', 'Supervisor')) {
+        @if (
+          tieneRol(
+            'Admin',
+            'Supervisor'
+          )
+        ) {
+
           <a
             class="nav-button"
-            href="/catalog">
+            href="/catalog"
+          >
             Catálogo técnico
           </a>
         }
 
       </div>
-
     }
 
     <router-outlet></router-outlet>
 
   </div>
+
 </div>
