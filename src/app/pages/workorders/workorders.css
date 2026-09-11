@@ -8,6 +8,59 @@
   margin-bottom: 24px;
 }
 
+.create-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.create-card h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.create-button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.create-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.orders-list {
+  margin-top: 20px;
+}
+
 .workorder-card {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -41,7 +94,18 @@
   margin: 8px 0;
 }
 
+.success {
+  text-align: center;
+  font-weight: 600;
+  margin: 16px 0;
+}
+
 .error {
   color: #b91c1c;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.loading {
   text-align: center;
 }
