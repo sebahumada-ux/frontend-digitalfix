@@ -109,3 +109,39 @@
 .loading {
   text-align: center;
 }
+
+.status-control {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-control select {
+  padding: 9px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.status-button {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.status-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.final-state {
+  margin-top: 18px !important;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  font-weight: 600;
+}
