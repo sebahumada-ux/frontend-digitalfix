@@ -1,0 +1,40 @@
+<section class="catalog-page">
+  <h2>Catálogo técnico</h2>
+
+  @if (cargando()) {
+    <p>Cargando catálogo...</p>
+  }
+
+  @if (error()) {
+    <p>{{ error() }}</p>
+  }
+
+  @if (!cargando() && !error()) {
+    @if (servicios().length === 0) {
+      <p>No hay servicios registrados.</p>
+    }
+
+    @for (servicio of servicios(); track servicio.id) {
+      <article class="service-card">
+        <h3>{{ servicio.nombre }}</h3>
+
+        <p>{{ servicio.descripcion }}</p>
+
+        <p>
+          <strong>Tarifa:</strong>
+          ${{ servicio.tarifa }}
+        </p>
+
+        <p>
+          <strong>Stock:</strong>
+          {{ servicio.stock }}
+        </p>
+
+        <p>
+          <strong>Estado:</strong>
+          {{ servicio.activo ? 'Activo' : 'Inactivo' }}
+        </p>
+      </article>
+    }
+  }
+</section>
