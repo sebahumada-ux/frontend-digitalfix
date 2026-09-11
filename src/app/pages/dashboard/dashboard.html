@@ -1,1 +1,240 @@
-<p>dashboard works!</p>
+<section class="dashboard-page">
+
+  <div class="dashboard-header">
+
+    <h2>
+      Dashboard
+    </h2>
+
+    <p>
+      Resumen general de DigitalFix
+    </p>
+
+    <span class="role-badge">
+      Rol: {{ rolActual() }}
+    </span>
+
+  </div>
+
+  @if (error()) {
+
+    <p class="error">
+      {{ error() }}
+    </p>
+  }
+
+  @if (cargando()) {
+
+    <p class="loading">
+      Cargando información...
+    </p>
+  }
+
+  @if (!cargando() && !error()) {
+
+    <section class="metrics">
+
+      <article class="metric-card">
+
+        <span class="metric-title">
+          Órdenes totales
+        </span>
+
+        <strong class="metric-value">
+          {{ ordenes().length }}
+        </strong>
+
+      </article>
+
+      <article class="metric-card">
+
+        <span class="metric-title">
+          Órdenes activas
+        </span>
+
+        <strong class="metric-value">
+          {{ ordenesActivas() }}
+        </strong>
+
+      </article>
+
+      <article class="metric-card">
+
+        <span class="metric-title">
+          Cerradas
+        </span>
+
+        <strong class="metric-value">
+          {{ contarEstado('CERRADA') }}
+        </strong>
+
+      </article>
+
+      <article class="metric-card">
+
+        <span class="metric-title">
+          Canceladas
+        </span>
+
+        <strong class="metric-value">
+          {{ contarEstado('CANCELADA') }}
+        </strong>
+
+      </article>
+
+      @if (
+        tieneRol(
+          'Admin',
+          'Supervisor'
+        )
+      ) {
+
+        <article class="metric-card">
+
+          <span class="metric-title">
+            Servicios activos
+          </span>
+
+          <strong class="metric-value">
+            {{ serviciosActivos() }}
+          </strong>
+
+        </article>
+      }
+
+    </section>
+
+    @if (
+      tieneRol(
+        'Admin',
+        'Supervisor'
+      )
+    ) {
+
+      <section class="status-section">
+
+        <h3>
+          Estado de las órdenes
+        </h3>
+
+        <div class="status-grid">
+
+          <div>
+            <strong>
+              {{ contarEstado('CREADA') }}
+            </strong>
+
+            <span>
+              Creadas
+            </span>
+          </div>
+
+          <div>
+            <strong>
+              {{ contarEstado('ASIGNADA') }}
+            </strong>
+
+            <span>
+              Asignadas
+            </span>
+          </div>
+
+          <div>
+            <strong>
+              {{
+                contarEstado(
+                  'EN_DESPLAZAMIENTO'
+                )
+              }}
+            </strong>
+
+            <span>
+              En desplazamiento
+            </span>
+          </div>
+
+          <div>
+            <strong>
+              {{
+                contarEstado(
+                  'EN_EJECUCION'
+                )
+              }}
+            </strong>
+
+            <span>
+              En ejecución
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+    }
+
+    <section class="recent-section">
+
+      <h3>
+        Órdenes recientes
+      </h3>
+
+      @if (
+        ordenesRecientes().length === 0
+      ) {
+
+        <p>
+          No existen órdenes registradas.
+        </p>
+      }
+
+      @for (
+        orden of ordenesRecientes();
+        track orden.id
+      ) {
+
+        <article class="recent-card">
+
+          <div class="recent-header">
+
+            <strong>
+              Orden #{{ orden.id }}
+            </strong>
+
+            <span class="status-badge">
+              {{ orden.estado }}
+            </span>
+
+          </div>
+
+          <p>
+            {{ orden.descripcion }}
+          </p>
+
+          <p>
+            <strong>
+              Dirección:
+            </strong>
+
+            {{ orden.direccion }}
+          </p>
+
+          <p>
+            <strong>
+              Actualización:
+            </strong>
+
+            {{
+              formatearFecha(
+                orden.fechaActualizacion
+              )
+            }}
+          </p>
+
+        </article>
+      }
+
+    </section>
+
+  }
+
+</section>
