@@ -1,0 +1,47 @@
+.workorders-page {
+  width: 100%;
+  text-align: left;
+}
+
+.workorders-page h2 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.workorder-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.header h3 {
+  margin: 0;
+}
+
+.estado {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.workorder-card p {
+  margin: 8px 0;
+}
+
+.error {
+  color: #b91c1c;
+  text-align: center;
+}
