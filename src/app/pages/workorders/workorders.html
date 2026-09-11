@@ -1,0 +1,299 @@
+<section class="workorders-page">
+
+  <h2>
+    Órdenes de trabajo
+  </h2>
+
+  <section class="create-card">
+
+    <h3>
+      Crear nueva orden
+    </h3>
+
+    <form
+      (ngSubmit)="crearOrden()"
+    >
+
+      <div class="form-group">
+
+        <label for="clienteId">
+          ID Cliente *
+        </label>
+
+        <input
+          id="clienteId"
+          name="clienteId"
+          type="number"
+          min="1"
+          [(ngModel)]="clienteId"
+          required
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="descripcion">
+          Descripción *
+        </label>
+
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          rows="3"
+          [(ngModel)]="descripcion"
+          required
+        ></textarea>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="direccion">
+          Dirección *
+        </label>
+
+        <input
+          id="direccion"
+          name="direccion"
+          type="text"
+          [(ngModel)]="direccion"
+          required
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="tecnicoId">
+          ID Técnico
+        </label>
+
+        <input
+          id="tecnicoId"
+          name="tecnicoId"
+          type="number"
+          min="1"
+          [(ngModel)]="tecnicoId"
+        />
+
+      </div>
+
+      <button
+        class="create-button"
+        type="submit"
+        [disabled]="creando()"
+      >
+
+        @if (creando()) {
+
+          Creando...
+
+        } @else {
+
+          Crear orden
+        }
+
+      </button>
+
+    </form>
+
+  </section>
+
+  @if (mensaje()) {
+
+    <p class="success">
+      {{ mensaje() }}
+    </p>
+  }
+
+  @if (error()) {
+
+    <p class="error">
+      {{ error() }}
+    </p>
+  }
+
+  @if (cargando()) {
+
+    <p class="loading">
+      Cargando órdenes...
+    </p>
+  }
+
+  @if (!cargando()) {
+
+    <section class="orders-list">
+
+      @if (
+        ordenes().length === 0
+      ) {
+
+        <p>
+          No hay órdenes de trabajo registradas.
+        </p>
+      }
+
+      @for (
+        orden of ordenes();
+        track orden.id
+      ) {
+
+        <article class="workorder-card">
+
+          <div class="header">
+
+            <h3>
+              Orden #{{ orden.id }}
+            </h3>
+
+            <span class="estado">
+              {{ orden.estado }}
+            </span>
+
+          </div>
+
+          <p>
+            <strong>
+              Cliente:
+            </strong>
+
+            {{ orden.clienteId }}
+          </p>
+
+          <p>
+            <strong>
+              Descripción:
+            </strong>
+
+            {{ orden.descripcion }}
+          </p>
+
+          <p>
+            <strong>
+              Dirección:
+            </strong>
+
+            {{ orden.direccion }}
+          </p>
+
+          <p>
+            <strong>
+              Técnico:
+            </strong>
+
+            {{
+              orden.tecnicoId ??
+              'Sin asignar'
+            }}
+          </p>
+
+          <p>
+            <strong>
+              Fecha de creación:
+            </strong>
+
+            {{
+              formatearFecha(
+                orden.fechaCreacion
+              )
+            }}
+          </p>
+
+          <p>
+            <strong>
+              Última actualización:
+            </strong>
+
+            {{
+              formatearFecha(
+                orden.fechaActualizacion
+              )
+            }}
+          </p>
+
+          @if (
+            puedeCambiarEstado() &&
+            estadosPermitidos(orden).length > 0
+          ) {
+
+            <div class="status-control">
+
+              <label
+                [for]="'estado-' + orden.id"
+              >
+
+                <strong>
+                  Cambiar estado:
+                </strong>
+
+              </label>
+
+              <select
+                [id]="'estado-' + orden.id"
+                [name]="'estado-' + orden.id"
+                [(ngModel)]="
+                  estadoSeleccionado[orden.id]
+                "
+              >
+
+                @for (
+                  estado of estadosPermitidos(orden);
+                  track estado
+                ) {
+
+                  <option
+                    [value]="estado"
+                  >
+                    {{ estado }}
+                  </option>
+                }
+
+              </select>
+
+              <button
+                type="button"
+                class="status-button"
+                (click)="
+                  actualizarEstado(orden)
+                "
+                [disabled]="
+                  actualizandoId() ===
+                  orden.id
+                "
+              >
+
+                @if (
+                  actualizandoId() ===
+                  orden.id
+                ) {
+
+                  Actualizando...
+
+                } @else {
+
+                  Actualizar estado
+                }
+
+              </button>
+
+            </div>
+          }
+
+          @if (
+            puedeCambiarEstado() &&
+            estadosPermitidos(orden).length === 0
+          ) {
+
+            <p class="final-state">
+              Orden finalizada
+            </p>
+          }
+
+        </article>
+      }
+
+    </section>
+  }
+
+</section>
