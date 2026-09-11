@@ -1,5 +1,6 @@
 <div class="page">
   <div class="card">
+
     <h1>DigitalFix</h1>
 
     <p class="subtitle">
@@ -7,25 +8,61 @@
     </p>
 
     @if (!isLoggedIn()) {
-      <button class="primary-button" (click)="login()">
+
+      <button
+        class="primary-button"
+        (click)="login()">
         Iniciar sesión con Microsoft
       </button>
+
     }
 
     @if (isLoggedIn()) {
+
       <div class="session-box">
-        <p>
-          Sesión iniciada como:
-        </p>
+
+        <p>Sesión iniciada como:</p>
 
         <strong>{{ username() }}</strong>
 
-        <button class="secondary-button" (click)="logout()">
+        @if (roles().length > 0) {
+          <p>
+            <strong>Rol:</strong>
+            {{ roles()[0] }}
+          </p>
+        }
+
+        <button
+          class="secondary-button"
+          (click)="logout()">
           Cerrar sesión
         </button>
+
       </div>
+
+      <div class="navigation">
+
+        @if (tieneRol('Admin', 'Supervisor', 'Cliente')) {
+          <a
+            class="nav-button"
+            href="/workorders">
+            Órdenes de trabajo
+          </a>
+        }
+
+        @if (tieneRol('Admin', 'Supervisor')) {
+          <a
+            class="nav-button"
+            href="/catalog">
+            Catálogo técnico
+          </a>
+        }
+
+      </div>
+
     }
 
     <router-outlet></router-outlet>
+
   </div>
 </div>

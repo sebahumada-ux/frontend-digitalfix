@@ -16,6 +16,7 @@ export class App implements OnInit {
   protected readonly title = signal('frontend-digitalfix');
   protected readonly isLoggedIn = signal(false);
   protected readonly username = signal('');
+  protected readonly roles = signal<string[]>([]);
 
   constructor(private authService: MsalService) {}
 
@@ -35,6 +36,8 @@ export class App implements OnInit {
           this.authService.instance.setActiveAccount(account);
           this.isLoggedIn.set(true);
           this.username.set(account.username);
+
+          this.cargarRoles();
         }
       },
       error: (error) => {
@@ -53,5 +56,74 @@ export class App implements OnInit {
     this.authService.logoutRedirect({
       postLogoutRedirectUri: 'http://localhost:4200'
     });
+  }
+
+  protected tieneRol(...rolesPermitidos: string[]): boolean {
+    const rolesUsuario =
+      this.roles().map((rol) => rol.toLowerCase());
+
+    return rolesPermitidos.some((rol) =>
+      rolesUsuario.includes(rol.toLowerCase())
+    );
+  }
+
+  private cargarRoles(): void {
+    const account = this.authService.instance.getActiveAccount();
+
+    if (!account) {
+      this.roles.set([]);
+      return;
+    }
+
+    this.authService.acquireTokenSilent({
+      scopes: [API_SCOPE],
+      account
+    }).subscribe({
+      next: (result) => {
+        const roles =
+          this.obtenerRolesDesdeToken(result.accessToken);
+
+        this.roles.set(roles);
+
+        console.log('Roles del usuario:', roles);
+      },
+      error: (error) => {
+        console.error('Error obteniendo roles:', error);
+        this.roles.set([]);
+      }
+    });
+  }
+
+  private obtenerRolesDesdeToken(token: string): string[] {
+    try {
+      const payload = token.split('.')[1];
+
+      if (!payload) {
+        return [];
+      }
+
+      const base64 = payload
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .padEnd(
+          Math.ceil(payload.length / 4) * 4,
+          '='
+        );
+
+      const claims = JSON.parse(atob(base64));
+
+      if (Array.isArray(claims.roles)) {
+        return claims.roles;
+      }
+
+      return [];
+    } catch (error) {
+      console.error(
+        'Error leyendo claims del token:',
+        error
+      );
+
+      return [];
+    }
   }
 }
