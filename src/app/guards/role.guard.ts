@@ -25,7 +25,8 @@ export const roleGuard: CanActivateFn = (route) => {
 
   return authService.acquireTokenSilent({
     scopes: [API_SCOPE],
-    account
+    account,
+    forceRefresh: true
   }).pipe(
 
     map((result) => {
