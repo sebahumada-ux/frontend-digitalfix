@@ -1,50 +1,63 @@
-<div class="page">
+<div class="app-container">
 
-  <div class="card">
+  @if (!isLoggedIn()) {
 
-    <h1>
-      DigitalFix
-    </h1>
+    <main class="login-page">
 
-    <p class="subtitle">
-      Plataforma de gestión de órdenes de trabajo
-    </p>
+      <section class="login-card">
 
-    @if (!isLoggedIn()) {
+        <div class="brand-icon">
+          DF
+        </div>
 
-      <button
-        class="primary-button"
-        (click)="login()"
-      >
-        Iniciar sesión con Microsoft
-      </button>
-    }
+        <h1>DigitalFix</h1>
 
-    @if (isLoggedIn()) {
-
-      <div class="session-box">
-
-        <p>
-          Sesión iniciada como:
+        <p class="subtitle">
+          Plataforma de gestión de órdenes de trabajo
         </p>
 
-        <strong>
-          {{ username() }}
-        </strong>
+        <button
+          class="primary-button login-button"
+          (click)="login()"
+        >
+          Iniciar sesión con Microsoft
+        </button>
 
-        @if (roles().length > 0) {
+      </section>
 
-          <p>
-            <strong>
-              Rol:
-            </strong>
+    </main>
 
-            {{ roles()[0] }}
-          </p>
-        }
+  }
+
+  @if (isLoggedIn()) {
+
+    <header class="topbar">
+
+      <div class="topbar-brand">
+        <div class="brand-logo">
+          DF
+        </div>
+
+        <div>
+          <h1>DigitalFix</h1>
+          <span>Gestión de servicios técnicos</span>
+        </div>
+      </div>
+
+      <div class="user-area">
+
+        <div class="user-info">
+          <strong>{{ username() }}</strong>
+
+          @if (roles().length > 0) {
+            <span>
+              {{ roles()[0] }}
+            </span>
+          }
+        </div>
 
         <button
-          class="secondary-button"
+          class="logout-button"
           (click)="logout()"
         >
           Cerrar sesión
@@ -52,51 +65,85 @@
 
       </div>
 
-      <div class="navigation">
+    </header>
 
-        <a
-          class="nav-button"
-          href="/dashboard"
-        >
-          Dashboard
-        </a>
+    <div class="app-layout">
 
-        @if (
-          tieneRol(
-            'Admin',
-            'Supervisor',
-            'Cliente'
-          )
-        ) {
+      <aside class="sidebar">
+
+        <div class="sidebar-title">
+          Menú principal
+        </div>
+
+        <nav class="navigation">
 
           <a
             class="nav-button"
-            href="/workorders"
+            href="/dashboard"
           >
-            Órdenes de trabajo
+            <span class="nav-icon">⌂</span>
+            Dashboard
           </a>
-        }
 
-        @if (
-          tieneRol(
-            'Admin',
-            'Supervisor'
-          )
-        ) {
+          @if (
+            tieneRol(
+              'Admin',
+              'Supervisor',
+              'Cliente'
+            )
+          ) {
 
-          <a
-            class="nav-button"
-            href="/catalog"
-          >
-            Catálogo técnico
-          </a>
-        }
+            <a
+              class="nav-button"
+              href="/workorders"
+            >
+              <span class="nav-icon">▤</span>
+              Órdenes de trabajo
+            </a>
 
-      </div>
-    }
+          }
 
-    <router-outlet></router-outlet>
+          @if (
+            tieneRol(
+              'Admin',
+              'Supervisor'
+            )
+          ) {
 
-  </div>
+            <a
+              class="nav-button"
+              href="/catalog"
+            >
+              <span class="nav-icon">▦</span>
+              Catálogo técnico
+            </a>
+
+          }
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+          <span>Sesión activa</span>
+
+          @if (roles().length > 0) {
+            <strong>
+              {{ roles()[0] }}
+            </strong>
+          }
+
+        </div>
+
+      </aside>
+
+      <main class="main-content">
+
+        <router-outlet></router-outlet>
+
+      </main>
+
+    </div>
+
+  }
 
 </div>

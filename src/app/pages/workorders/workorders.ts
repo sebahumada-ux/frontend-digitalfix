@@ -314,7 +314,8 @@ export class Workorders implements OnInit {
     this.authService
       .acquireTokenSilent({
         scopes: [API_SCOPE],
-        account
+        account,
+        forceRefresh: true
       })
       .subscribe({
 

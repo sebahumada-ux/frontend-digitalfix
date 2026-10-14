@@ -21,7 +21,9 @@ export class App implements OnInit {
   constructor(private authService: MsalService) {}
 
   ngOnInit(): void {
-    this.authService.handleRedirectObservable().subscribe({
+    this.authService.handleRedirectObservable({
+      navigateToLoginRequestUrl: false
+    }).subscribe({
       next: (result) => {
 
         if (result?.account) {
@@ -42,6 +44,9 @@ export class App implements OnInit {
       },
       error: (error) => {
         console.error('Error MSAL:', error);
+      },
+      complete: () => {
+        this.limpiarUrlMsal();
       }
     });
   }
@@ -54,7 +59,7 @@ export class App implements OnInit {
 
   logout(): void {
     this.authService.logoutRedirect({
-      postLogoutRedirectUri: 'http://localhost:4200'
+      postLogoutRedirectUri: window.location.origin
     });
   }
 
@@ -77,7 +82,8 @@ export class App implements OnInit {
 
     this.authService.acquireTokenSilent({
       scopes: [API_SCOPE],
-      account
+      account,
+      forceRefresh: true
     }).subscribe({
       next: (result) => {
         const roles =
@@ -124,6 +130,20 @@ export class App implements OnInit {
       );
 
       return [];
+    }
+  }
+
+  private limpiarUrlMsal(): void {
+    const url = new URL(window.location.href);
+
+    if (url.searchParams.has('state')) {
+      url.searchParams.delete('state');
+
+      window.history.replaceState(
+        {},
+        document.title,
+        `${url.pathname}${url.search}${url.hash}`
+      );
     }
   }
 }
