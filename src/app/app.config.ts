@@ -46,7 +46,7 @@ export function msalInstanceFactory(): IPublicClientApplication {
     auth: {
       clientId: FRONTEND_CLIENT_ID,
       authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-      redirectUri: 'http://localhost:4200'
+      redirectUri: window.location.origin
     },
     cache: {
       cacheLocation: BrowserCacheLocation.SessionStorage
