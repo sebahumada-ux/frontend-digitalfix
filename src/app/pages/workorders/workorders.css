@@ -150,3 +150,27 @@
   min-height: 76px;
   resize: vertical;
 }
+
+.client-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.client-search input {
+  flex: 1 1 210px;
+}
+
+.client-search button {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.form-group select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
+}
