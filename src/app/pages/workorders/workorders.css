@@ -119,7 +119,8 @@
   gap: 10px;
 }
 
-.status-control select {
+.status-control select,
+.status-control textarea {
   padding: 9px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -144,4 +145,32 @@
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
   font-weight: 600;
+}
+.status-control textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.client-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.client-search input {
+  flex: 1 1 210px;
+}
+
+.client-search button {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.form-group select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
 }

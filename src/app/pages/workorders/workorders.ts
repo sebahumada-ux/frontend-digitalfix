@@ -6,6 +6,11 @@ import { MsalService } from '@azure/msal-angular';
 const API_SCOPE =
   'api://fad2db65-7d82-41d8-a0c5-2fa1e2512ee4/access_as_user';
 
+interface Cliente {
+  id: number;
+  nombre: string;
+}
+
 interface WorkOrder {
   id: number;
   clienteId: number;
@@ -15,6 +20,7 @@ interface WorkOrder {
   estado: string;
   fechaCreacion: string;
   fechaActualizacion: string;
+  observacionTecnica?: string | null;
 }
 
 interface CrearWorkOrderRequest {
@@ -26,6 +32,7 @@ interface CrearWorkOrderRequest {
 
 interface ActualizarEstadoRequest {
   estado: string;
+  observacionTecnica: string | null;
 }
 
 @Component({
@@ -37,6 +44,9 @@ interface ActualizarEstadoRequest {
 export class Workorders implements OnInit {
 
   protected readonly ordenes = signal<WorkOrder[]>([]);
+  protected readonly clientesEncontrados = signal<Cliente[]>([]);
+  protected readonly cargandoClientes = signal(false);
+  protected readonly creandoCliente = signal(false);
   protected readonly cargando = signal(true);
   protected readonly creando = signal(false);
   protected readonly actualizandoId =
@@ -49,14 +59,20 @@ export class Workorders implements OnInit {
   protected readonly mensaje = signal('');
 
   protected clienteId: number | null = null;
+  protected nombreClienteBusqueda = '';
+  protected nuevoClienteNombre = '';
   protected descripcion = '';
   protected direccion = '';
   protected tecnicoId: number | null = null;
 
   protected estadoSeleccionado: Record<number, string> = {};
+  protected observacionesPorOrden: Record<number, string> = {};
 
   private readonly apiUrl =
     'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
+
+  private readonly clientesUrl =
+    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/clientes';
 
   constructor(
     private http: HttpClient,
@@ -111,6 +127,55 @@ export class Workorders implements OnInit {
       });
   }
 
+  buscarClientes(): void {
+    this.error.set('');
+    this.cargandoClientes.set(true);
+
+    const nombre = this.nombreClienteBusqueda.trim();
+    const params: Record<string, string> = nombre ? { nombre } : {};
+
+    this.http.get<Cliente[]>(this.clientesUrl, { params })
+      .subscribe({
+        next: (clientes) => {
+          this.clientesEncontrados.set(clientes);
+          this.cargandoClientes.set(false);
+        },
+        error: () => {
+          this.error.set('No fue posible buscar los clientes.');
+          this.cargandoClientes.set(false);
+        }
+      });
+  }
+
+  crearCliente(): void {
+    const nombre = this.nuevoClienteNombre.trim();
+
+    if (!nombre || nombre.length > 120) {
+      this.error.set('Ingresa un nombre de cliente entre 1 y 120 caracteres.');
+      return;
+    }
+
+    this.creandoCliente.set(true);
+    this.error.set('');
+
+    this.http.post<Cliente>(this.clientesUrl, { nombre })
+      .subscribe({
+        next: (cliente) => {
+          this.clientesEncontrados.update(clientes =>
+            [cliente, ...clientes.filter(item => item.id !== cliente.id)]
+          );
+          this.clienteId = cliente.id;
+          this.nuevoClienteNombre = '';
+          this.creandoCliente.set(false);
+          this.mensaje.set('Cliente registrado. Ya puedes crear su orden.');
+        },
+        error: () => {
+          this.error.set('No fue posible registrar el cliente.');
+          this.creandoCliente.set(false);
+        }
+      });
+  }
+
   crearOrden(): void {
 
     this.error.set('');
@@ -118,8 +183,12 @@ export class Workorders implements OnInit {
 
     if (
       this.clienteId === null ||
+      this.clienteId <= 0 ||
+      (this.tecnicoId !== null && this.tecnicoId <= 0) ||
       !this.descripcion.trim() ||
-      !this.direccion.trim()
+      this.descripcion.trim().length > 500 ||
+      !this.direccion.trim() ||
+      this.direccion.trim().length > 255
     ) {
 
       this.error.set(
@@ -200,10 +269,22 @@ export class Workorders implements OnInit {
       return;
     }
 
-    const request:
-      ActualizarEstadoRequest = {
+    const observacion =
+      (this.observacionesPorOrden[orden.id] ?? '').trim();
 
-      estado: nuevoEstado
+    if (nuevoEstado === 'CERRADA' && !observacion) {
+      this.error.set('Debes escribir una observación para cerrar la orden.');
+      return;
+    }
+
+    if (observacion.length > 1000) {
+      this.error.set('La observación no puede superar 1000 caracteres.');
+      return;
+    }
+
+    const request: ActualizarEstadoRequest = {
+      estado: nuevoEstado,
+      observacionTecnica: observacion || null
     };
 
     this.actualizandoId.set(
@@ -224,6 +305,7 @@ export class Workorders implements OnInit {
           );
 
           this.actualizandoId.set(null);
+          this.observacionesPorOrden[orden.id] = '';
 
           this.cargarOrdenes();
         },

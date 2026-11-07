@@ -14,22 +14,66 @@
       (ngSubmit)="crearOrden()"
     >
 
-      <div class="form-group">
+      @if (puedeCambiarEstado()) {
+        <div class="form-group">
+          <label for="buscarCliente">Buscar cliente por nombre</label>
+          <div class="client-search">
+            <input
+              id="buscarCliente"
+              name="buscarCliente"
+              type="text"
+              [(ngModel)]="nombreClienteBusqueda"
+              placeholder="Ej.: María González"
+              maxlength="120"
+            />
+            <button type="button" (click)="buscarClientes()">
+              {{ cargandoClientes() ? 'Buscando...' : 'Buscar' }}
+            </button>
+          </div>
+        </div>
 
-        <label for="clienteId">
-          ID Cliente *
-        </label>
+        <div class="form-group">
+          <label for="clienteId">Cliente *</label>
+          <select id="clienteId" name="clienteId" [(ngModel)]="clienteId" required>
+            <option [ngValue]="null">Selecciona un cliente</option>
+            @for (cliente of clientesEncontrados(); track cliente.id) {
+              <option [ngValue]="cliente.id">
+                {{ cliente.nombre }} (ID {{ cliente.id }})
+              </option>
+            }
+          </select>
+        </div>
 
-        <input
-          id="clienteId"
-          name="clienteId"
-          type="number"
-          min="1"
-          [(ngModel)]="clienteId"
-          required
-        />
-
-      </div>
+        <div class="form-group">
+          <label for="nuevoClienteNombre">Registrar cliente nuevo</label>
+          <div class="client-search">
+            <input
+              id="nuevoClienteNombre"
+              name="nuevoClienteNombre"
+              type="text"
+              [(ngModel)]="nuevoClienteNombre"
+              placeholder="Nombre del cliente"
+              maxlength="120"
+            />
+            <button type="button" (click)="crearCliente()"
+              [disabled]="creandoCliente()">
+              {{ creandoCliente() ? 'Registrando...' : 'Registrar' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="form-group">
+          <label for="clienteId">ID Cliente *</label>
+          <input
+            id="clienteId"
+            name="clienteId"
+            type="number"
+            min="1"
+            [(ngModel)]="clienteId"
+            required
+          />
+        </div>
+      }
 
       <div class="form-group">
 
@@ -212,6 +256,13 @@
             }}
           </p>
 
+          @if (orden.observacionTecnica) {
+            <p>
+              <strong>Última observación técnica:</strong>
+              {{ orden.observacionTecnica }}
+            </p>
+          }
+
           @if (
             puedeCambiarEstado() &&
             estadosPermitidos(orden).length > 0
@@ -250,6 +301,27 @@
                 }
 
               </select>
+
+              <label [for]="'observacion-' + orden.id">
+                <strong>
+                  Observación técnica
+                  @if (estadoSeleccionado[orden.id] === 'CERRADA') {
+                    (obligatoria para cerrar)
+                  } @else {
+                    (opcional)
+                  }
+                </strong>
+              </label>
+
+              <textarea
+                [id]="'observacion-' + orden.id"
+                [name]="'observacion-' + orden.id"
+                rows="3"
+                maxlength="1000"
+                placeholder="Ej.: Se revisó el equipo; la batería dura solo 30 minutos."
+                [(ngModel)]="observacionesPorOrden[orden.id]"
+                [required]="estadoSeleccionado[orden.id] === 'CERRADA'"
+              ></textarea>
 
               <button
                 type="button"
