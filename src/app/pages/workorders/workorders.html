@@ -14,22 +14,66 @@
       (ngSubmit)="crearOrden()"
     >
 
-      <div class="form-group">
+      @if (puedeCambiarEstado()) {
+        <div class="form-group">
+          <label for="buscarCliente">Buscar cliente por nombre</label>
+          <div class="client-search">
+            <input
+              id="buscarCliente"
+              name="buscarCliente"
+              type="text"
+              [(ngModel)]="nombreClienteBusqueda"
+              placeholder="Ej.: María González"
+              maxlength="120"
+            />
+            <button type="button" (click)="buscarClientes()">
+              {{ cargandoClientes() ? 'Buscando...' : 'Buscar' }}
+            </button>
+          </div>
+        </div>
 
-        <label for="clienteId">
-          ID Cliente *
-        </label>
+        <div class="form-group">
+          <label for="clienteId">Cliente *</label>
+          <select id="clienteId" name="clienteId" [(ngModel)]="clienteId" required>
+            <option [ngValue]="null">Selecciona un cliente</option>
+            @for (cliente of clientesEncontrados(); track cliente.id) {
+              <option [ngValue]="cliente.id">
+                {{ cliente.nombre }} (ID {{ cliente.id }})
+              </option>
+            }
+          </select>
+        </div>
 
-        <input
-          id="clienteId"
-          name="clienteId"
-          type="number"
-          min="1"
-          [(ngModel)]="clienteId"
-          required
-        />
-
-      </div>
+        <div class="form-group">
+          <label for="nuevoClienteNombre">Registrar cliente nuevo</label>
+          <div class="client-search">
+            <input
+              id="nuevoClienteNombre"
+              name="nuevoClienteNombre"
+              type="text"
+              [(ngModel)]="nuevoClienteNombre"
+              placeholder="Nombre del cliente"
+              maxlength="120"
+            />
+            <button type="button" (click)="crearCliente()"
+              [disabled]="creandoCliente()">
+              {{ creandoCliente() ? 'Registrando...' : 'Registrar' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="form-group">
+          <label for="clienteId">ID Cliente *</label>
+          <input
+            id="clienteId"
+            name="clienteId"
+            type="number"
+            min="1"
+            [(ngModel)]="clienteId"
+            required
+          />
+        </div>
+      }
 
       <div class="form-group">
 
