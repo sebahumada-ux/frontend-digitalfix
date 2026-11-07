@@ -15,6 +15,7 @@ interface WorkOrder {
   estado: string;
   fechaCreacion: string;
   fechaActualizacion: string;
+  observacionTecnica?: string | null;
 }
 
 interface CrearWorkOrderRequest {
@@ -26,6 +27,7 @@ interface CrearWorkOrderRequest {
 
 interface ActualizarEstadoRequest {
   estado: string;
+  observacionTecnica: string | null;
 }
 
 @Component({
@@ -54,6 +56,7 @@ export class Workorders implements OnInit {
   protected tecnicoId: number | null = null;
 
   protected estadoSeleccionado: Record<number, string> = {};
+  protected observacionesPorOrden: Record<number, string> = {};
 
   private readonly apiUrl =
     'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
@@ -118,8 +121,12 @@ export class Workorders implements OnInit {
 
     if (
       this.clienteId === null ||
+      this.clienteId <= 0 ||
+      (this.tecnicoId !== null && this.tecnicoId <= 0) ||
       !this.descripcion.trim() ||
-      !this.direccion.trim()
+      this.descripcion.trim().length > 500 ||
+      !this.direccion.trim() ||
+      this.direccion.trim().length > 255
     ) {
 
       this.error.set(
@@ -200,10 +207,22 @@ export class Workorders implements OnInit {
       return;
     }
 
-    const request:
-      ActualizarEstadoRequest = {
+    const observacion =
+      (this.observacionesPorOrden[orden.id] ?? '').trim();
 
-      estado: nuevoEstado
+    if (nuevoEstado === 'CERRADA' && !observacion) {
+      this.error.set('Debes escribir una observación para cerrar la orden.');
+      return;
+    }
+
+    if (observacion.length > 1000) {
+      this.error.set('La observación no puede superar 1000 caracteres.');
+      return;
+    }
+
+    const request: ActualizarEstadoRequest = {
+      estado: nuevoEstado,
+      observacionTecnica: observacion || null
     };
 
     this.actualizandoId.set(
@@ -224,6 +243,7 @@ export class Workorders implements OnInit {
           );
 
           this.actualizandoId.set(null);
+          this.observacionesPorOrden[orden.id] = '';
 
           this.cargarOrdenes();
         },
