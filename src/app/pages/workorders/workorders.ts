@@ -6,6 +6,11 @@ import { MsalService } from '@azure/msal-angular';
 const API_SCOPE =
   'api://fad2db65-7d82-41d8-a0c5-2fa1e2512ee4/access_as_user';
 
+interface Cliente {
+  id: number;
+  nombre: string;
+}
+
 interface WorkOrder {
   id: number;
   clienteId: number;
@@ -39,6 +44,9 @@ interface ActualizarEstadoRequest {
 export class Workorders implements OnInit {
 
   protected readonly ordenes = signal<WorkOrder[]>([]);
+  protected readonly clientesEncontrados = signal<Cliente[]>([]);
+  protected readonly cargandoClientes = signal(false);
+  protected readonly creandoCliente = signal(false);
   protected readonly cargando = signal(true);
   protected readonly creando = signal(false);
   protected readonly actualizandoId =
@@ -51,6 +59,8 @@ export class Workorders implements OnInit {
   protected readonly mensaje = signal('');
 
   protected clienteId: number | null = null;
+  protected nombreClienteBusqueda = '';
+  protected nuevoClienteNombre = '';
   protected descripcion = '';
   protected direccion = '';
   protected tecnicoId: number | null = null;
@@ -60,6 +70,9 @@ export class Workorders implements OnInit {
 
   private readonly apiUrl =
     'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
+
+  private readonly clientesUrl =
+    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/clientes';
 
   constructor(
     private http: HttpClient,
@@ -110,6 +123,55 @@ export class Workorders implements OnInit {
           );
 
           this.cargando.set(false);
+        }
+      });
+  }
+
+  buscarClientes(): void {
+    this.error.set('');
+    this.cargandoClientes.set(true);
+
+    const nombre = this.nombreClienteBusqueda.trim();
+    const params = nombre ? { nombre } : {};
+
+    this.http.get<Cliente[]>(this.clientesUrl, { params })
+      .subscribe({
+        next: (clientes) => {
+          this.clientesEncontrados.set(clientes);
+          this.cargandoClientes.set(false);
+        },
+        error: () => {
+          this.error.set('No fue posible buscar los clientes.');
+          this.cargandoClientes.set(false);
+        }
+      });
+  }
+
+  crearCliente(): void {
+    const nombre = this.nuevoClienteNombre.trim();
+
+    if (!nombre || nombre.length > 120) {
+      this.error.set('Ingresa un nombre de cliente entre 1 y 120 caracteres.');
+      return;
+    }
+
+    this.creandoCliente.set(true);
+    this.error.set('');
+
+    this.http.post<Cliente>(this.clientesUrl, { nombre })
+      .subscribe({
+        next: (cliente) => {
+          this.clientesEncontrados.update(clientes =>
+            [cliente, ...clientes.filter(item => item.id !== cliente.id)]
+          );
+          this.clienteId = cliente.id;
+          this.nuevoClienteNombre = '';
+          this.creandoCliente.set(false);
+          this.mensaje.set('Cliente registrado. Ya puedes crear su orden.');
+        },
+        error: () => {
+          this.error.set('No fue posible registrar el cliente.');
+          this.creandoCliente.set(false);
         }
       });
   }
