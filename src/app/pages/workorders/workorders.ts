@@ -132,7 +132,7 @@ export class Workorders implements OnInit {
     this.cargandoClientes.set(true);
 
     const nombre = this.nombreClienteBusqueda.trim();
-    const params = nombre ? { nombre } : {};
+    const params: Record<string, string> = nombre ? { nombre } : {};
 
     this.http.get<Cliente[]>(this.clientesUrl, { params })
       .subscribe({
