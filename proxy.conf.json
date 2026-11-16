@@ -1,5 +1,5 @@
 {
-  "/api/analytics/**": {
+  "/api/analytics/stream": {
     "target": "http://localhost:8091",
     "secure": false,
     "changeOrigin": true
