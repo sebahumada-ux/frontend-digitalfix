@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MsalService } from '@azure/msal-angular';
 
@@ -31,7 +31,7 @@ interface ServicioCatalogo {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
 
   protected readonly ordenes =
     signal<WorkOrder[]>([]);
@@ -49,7 +49,7 @@ export class Dashboard implements OnInit {
     signal('');
 
   private readonly workordersUrl =
-    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
+    '/api/workorders';
 
   private readonly catalogUrl =
     'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/catalog/services';
@@ -59,8 +59,32 @@ export class Dashboard implements OnInit {
     private authService: MsalService
   ) {}
 
+  private eventos?: EventSource;
+
   ngOnInit(): void {
     this.cargarDashboard();
+  }
+
+  ngOnDestroy(): void {
+    this.eventos?.close();
+  }
+
+  private conectarStreaming(): void {
+    if (this.eventos) {
+      return;
+    }
+
+    // La ruta se redirige al microservicio Analytics mediante el proxy local.
+    this.eventos = new EventSource('/api/analytics/stream');
+
+    this.eventos.addEventListener('orden-actualizada', () => {
+      this.cargarOrdenes();
+    });
+
+    // En una reconexión también recupera cambios ocurridos durante la caída.
+    this.eventos.addEventListener('conectado', () => {
+      this.cargarOrdenes();
+    });
   }
 
   private cargarDashboard(): void {
@@ -93,6 +117,7 @@ export class Dashboard implements OnInit {
         this.roles.set(roles);
 
         this.cargarOrdenes();
+        this.conectarStreaming();
 
         if (
           this.tieneRol(
