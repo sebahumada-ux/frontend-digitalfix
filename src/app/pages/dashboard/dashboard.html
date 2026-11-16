@@ -1,240 +1,236 @@
-<section class="dashboard-page">
+<section class="monitor-page" [class.modo-presentacion]="modoPresentacion()">
 
-  <div class="dashboard-header">
+  <header class="monitor-header">
+    <div class="header-copy">
+      <div class="eyebrow"><span class="eyebrow-mark"></span> DIGITALFIX / OPERACIONES</div>
+      <h2>Centro de operaciones</h2>
+      <p>Órdenes, actividad y eventos Kafka en tiempo casi real.</p>
+    </div>
 
-    <h2>
-      Dashboard
-    </h2>
-
-    <p>
-      Resumen general de DigitalFix
-    </p>
-
-    <span class="role-badge">
-      Rol: {{ rolActual() }}
-    </span>
-
-  </div>
+    <div class="header-actions">
+      <span class="connection-pill" [class.connected]="conexion() === 'conectado'"
+            [class.reconnecting]="conexion() === 'reconectando'">
+        <span class="connection-dot"></span>
+        {{ etiquetaConexion() }}
+      </span>
+      <button class="action-button" type="button" (click)="actualizarAhora()" aria-label="Sincronizar datos ahora">
+        ↻ <span>Sincronizar</span>
+      </button>
+      <button class="action-button presentation-button" type="button"
+              (click)="alternarPresentacion()" [attr.aria-pressed]="modoPresentacion()">
+        {{ modoPresentacion() ? 'Salir de presentación' : 'Modo presentación' }}
+      </button>
+    </div>
+  </header>
 
   @if (error()) {
-
-    <p class="error">
-      {{ error() }}
-    </p>
+    <div class="notice notice-error" role="alert">{{ error() }}</div>
   }
 
   @if (cargando()) {
+    <div class="notice" role="status">Cargando información de órdenes...</div>
+  } @else {
 
-    <p class="loading">
-      Cargando información...
-    </p>
-  }
-
-  @if (!cargando() && !error()) {
-
-    <section class="metrics">
-
-      <article class="metric-card">
-
-        <span class="metric-title">
-          Órdenes totales
-        </span>
-
-        <strong class="metric-value">
-          {{ ordenes().length }}
-        </strong>
-
-      </article>
-
-      <article class="metric-card">
-
-        <span class="metric-title">
-          Órdenes activas
-        </span>
-
-        <strong class="metric-value">
-          {{ ordenesActivas() }}
-        </strong>
-
-      </article>
-
-      <article class="metric-card">
-
-        <span class="metric-title">
-          Cerradas
-        </span>
-
-        <strong class="metric-value">
-          {{ contarEstado('CERRADA') }}
-        </strong>
-
-      </article>
-
-      <article class="metric-card">
-
-        <span class="metric-title">
-          Canceladas
-        </span>
-
-        <strong class="metric-value">
-          {{ contarEstado('CANCELADA') }}
-        </strong>
-
-      </article>
-
-      @if (
-        tieneRol(
-          'Admin',
-          'Supervisor'
-        )
-      ) {
-
-        <article class="metric-card">
-
-          <span class="metric-title">
-            Servicios activos
-          </span>
-
-          <strong class="metric-value">
-            {{ serviciosActivos() }}
-          </strong>
-
-        </article>
-      }
-
+    <section class="live-banner" aria-label="Flujo de eventos">
+      <div class="banner-summary">
+        <div class="banner-kicker"><span class="banner-pulse"></span> SEGUIMIENTO DE EVENTOS</div>
+        <h3>De la orden al dato, en vivo.</h3>
+        <p>El dashboard escucha los cambios procesados por Kafka Analytics y actualiza la vista automáticamente.</p>
+        <div class="banner-metadata">
+          <span>Última sincronización: {{ formatearHora(ultimaSincronizacion()) }}</span>
+          <span>Rol: {{ rolActual() }}</span>
+        </div>
+      </div>
+      <div class="flow-track" aria-label="Workorders, Kafka, Analytics y dashboard">
+        <div class="flow-node"><span>01</span><strong>Workorders</strong><small>Origen</small></div>
+        <div class="flow-link" aria-hidden="true">→</div>
+        <div class="flow-node"><span>02</span><strong>Kafka</strong><small>Eventos</small></div>
+        <div class="flow-link" aria-hidden="true">→</div>
+        <div class="flow-node"><span>03</span><strong>Analytics</strong><small>Procesamiento</small></div>
+        <div class="flow-link" aria-hidden="true">→</div>
+        <div class="flow-node active-node"><span>04</span><strong>Dashboard</strong><small>SSE</small></div>
+      </div>
     </section>
 
-    @if (
-      tieneRol(
-        'Admin',
-        'Supervisor'
-      )
-    ) {
+    <section class="metrics-grid" aria-label="Indicadores principales">
+      <article class="metric-card">
+        <div class="metric-top"><span>Órdenes totales</span><span class="metric-index">01 / OPERACIÓN</span></div>
+        <strong class="metric-number">{{ totalOrdenes() }}</strong>
+        <small>Órdenes registradas en Workorders</small>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Órdenes activas</span><span class="metric-index">02 / PROCESO</span></div>
+        <strong class="metric-number">{{ ordenesActivas() }}</strong>
+        <small>Pendientes, asignadas o en curso</small>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Órdenes cerradas</span><span class="metric-index">03 / RESULTADO</span></div>
+        <strong class="metric-number">{{ contarEstado('CERRADA') }}</strong>
+        <small>Trabajos finalizados</small>
+      </article>
+      <article class="metric-card metric-card-accent">
+        <div class="metric-top"><span>Eventos procesados</span><span class="metric-index">04 / KAFKA</span></div>
+        <strong class="metric-number">{{ resumenAnalytics()?.totalEventos ?? '—' }}</strong>
+        <small>Desde el inicio actual de Analytics</small>
+      </article>
+    </section>
 
-      <section class="status-section">
-
-        <h3>
-          Estado de las órdenes
-        </h3>
-
-        <div class="status-grid">
-
+    <div class="content-grid">
+      <section class="panel distribution-panel" aria-labelledby="estado-titulo">
+        <div class="panel-heading">
           <div>
-            <strong>
-              {{ contarEstado('CREADA') }}
-            </strong>
-
-            <span>
-              Creadas
-            </span>
+            <span class="section-kicker">VISIÓN OPERATIVA</span>
+            <h3 id="estado-titulo">Distribución por estado</h3>
           </div>
-
-          <div>
-            <strong>
-              {{ contarEstado('ASIGNADA') }}
-            </strong>
-
-            <span>
-              Asignadas
-            </span>
-          </div>
-
-          <div>
-            <strong>
-              {{
-                contarEstado(
-                  'EN_DESPLAZAMIENTO'
-                )
-              }}
-            </strong>
-
-            <span>
-              En desplazamiento
-            </span>
-          </div>
-
-          <div>
-            <strong>
-              {{
-                contarEstado(
-                  'EN_EJECUCION'
-                )
-              }}
-            </strong>
-
-            <span>
-              En ejecución
-            </span>
-          </div>
-
+          <span class="panel-meta">{{ totalOrdenes() }} órdenes</span>
         </div>
 
-      </section>
-    }
-
-    <section class="recent-section">
-
-      <h3>
-        Órdenes recientes
-      </h3>
-
-      @if (
-        ordenesRecientes().length === 0
-      ) {
-
-        <p>
-          No existen órdenes registradas.
-        </p>
-      }
-
-      @for (
-        orden of ordenesRecientes();
-        track orden.id
-      ) {
-
-        <article class="recent-card">
-
-          <div class="recent-header">
-
-            <strong>
-              Orden #{{ orden.id }}
-            </strong>
-
-            <span class="status-badge">
-              {{ orden.estado }}
-            </span>
-
+        <div class="distribution-main">
+          <div class="donut" [style.background]="fondoDistribucion()" role="img"
+               [attr.aria-label]="'Distribución de ' + totalOrdenes() + ' órdenes por estado'">
+            <div class="donut-center">
+              <span>TOTAL</span>
+              <strong>{{ totalOrdenes() }}</strong>
+              <small>órdenes</small>
+            </div>
           </div>
+          <div class="state-list">
+            @for (estado of estados; track estado.clave) {
+              <div class="state-row">
+                <div class="state-label">
+                  <span class="state-color" [style.background]="estado.color"></span>
+                  <span>{{ estado.etiqueta }}</span>
+                  <strong>{{ contarEstado(estado.clave) }}</strong>
+                </div>
+                <div class="state-progress" [attr.aria-label]="estado.etiqueta">
+                  <span [style.width.%]="porcentajeEstado(estado.clave)"
+                        [style.background]="estado.color"></span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
 
-          <p>
-            {{ orden.descripcion }}
-          </p>
+      <section class="panel feed-panel" aria-labelledby="actividad-titulo">
+        <div class="panel-heading">
+          <div>
+            <span class="section-kicker">STREAM DE EVENTOS</span>
+            <h3 id="actividad-titulo">Actividad en tiempo real</h3>
+          </div>
+          <span class="stream-indicator" [class.connected]="conexion() === 'conectado'">
+            <span class="stream-indicator-dot"></span>
+            {{ conexion() === 'conectado' ? 'ESCUCHANDO' : 'EN ESPERA' }}
+          </span>
+        </div>
 
-          <p>
-            <strong>
-              Dirección:
-            </strong>
+        @if (errorAnalytics()) {
+          <p class="inline-warning" role="status">{{ errorAnalytics() }}</p>
+        }
 
-            {{ orden.direccion }}
-          </p>
+        @if (eventosRecientes().length === 0) {
+          <div class="empty-state">
+            <span class="empty-symbol">⌁</span>
+            <strong>Esperando eventos</strong>
+            <p>Crea o modifica una orden para ver aquí la actividad que procese Kafka.</p>
+          </div>
+        } @else {
+          <div class="event-list" aria-live="polite" aria-relevant="additions text">
+            @for (evento of eventosRecientes(); track evento.eventId) {
+              <article class="event-item" [class.event-new]="evento.eventId === ultimoEventoEnVivo()">
+                <span class="event-rail"><span></span></span>
+                <div class="event-content">
+                  <div class="event-title">
+                    <strong>Orden #{{ evento.workOrderId }}</strong>
+                    <time>{{ formatearHora(evento.timestamp) }}</time>
+                  </div>
+                  <p>{{ etiquetaCategoria(evento.categoria) }}</p>
+                  <span class="event-tag">{{ etiquetaEstado(evento.estado) }}</span>
+                </div>
+              </article>
+            }
+          </div>
+        }
 
-          <p>
-            <strong>
-              Actualización:
-            </strong>
+        <div class="panel-footnote">Los eventos recientes provienen de Kafka Analytics; el historial mostrado es limitado.</div>
+      </section>
+    </div>
 
-            {{
-              formatearFecha(
-                orden.fechaActualizacion
-              )
-            }}
-          </p>
+    <div class="content-grid bottom-grid">
+      <section class="panel orders-panel" aria-labelledby="recientes-titulo">
+        <div class="panel-heading">
+          <div>
+            <span class="section-kicker">OPERACIÓN DIARIA</span>
+            <h3 id="recientes-titulo">Órdenes recientes</h3>
+          </div>
+          <a class="panel-link" href="/workorders">Ver todas <span aria-hidden="true">↗</span></a>
+        </div>
+        @if (ordenesRecientes().length === 0) {
+          <div class="empty-state compact"><p>Todavía no hay órdenes registradas.</p></div>
+        } @else {
+          <div class="order-list">
+            @for (orden of ordenesRecientes(); track orden.id) {
+              <article class="order-row">
+                <div class="order-icon">#</div>
+                <div class="order-summary">
+                  <strong>Orden {{ orden.id }}</strong>
+                  <span>{{ orden.descripcion }}</span>
+                </div>
+                <div class="order-side">
+                  <span class="order-state">{{ etiquetaEstado(orden.estado) }}</span>
+                  <time>{{ formatearFecha(orden.fechaActualizacion) }}</time>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
 
-        </article>
-      }
+      <section class="panel kafka-panel" aria-labelledby="kafka-titulo">
+        <div class="panel-heading">
+          <div>
+            <span class="section-kicker">TELEMETRÍA</span>
+            <h3 id="kafka-titulo">Kafka Analytics</h3>
+          </div>
+          <span class="panel-meta">RESUMEN ACTUAL</span>
+        </div>
 
-    </section>
+        <div class="kafka-total">
+          <div>
+            <span>Eventos procesados</span>
+            <strong>{{ resumenAnalytics()?.totalEventos ?? '—' }}</strong>
+          </div>
+          <span class="kafka-mark" aria-hidden="true">≋</span>
+        </div>
 
+        <h4>Eventos por categoría</h4>
+        @if (categoriasKafka().length === 0) {
+          <p class="empty-inline">Sin categorías registradas todavía.</p>
+        } @else {
+          <div class="category-list">
+            @for (categoria of categoriasKafka(); track categoria[0]) {
+              <div class="category-row">
+                <span>{{ etiquetaCategoria(categoria[0]) }}</span>
+                <strong>{{ categoria[1] }}</strong>
+              </div>
+            }
+          </div>
+        }
+
+        @if (tieneRol('Admin', 'Supervisor')) {
+          <div class="catalog-meta">
+            <span>Servicios de catálogo activos</span>
+            <strong>{{ serviciosActivos() }}</strong>
+          </div>
+        }
+        <p class="panel-footnote">Estos contadores viven en memoria y se reinician cuando vuelve a arrancar Analytics.</p>
+      </section>
+    </div>
+
+    @if (modoPresentacion()) {
+      <div class="presentation-hint" role="status">
+        Modo presentación activo · crea una orden en otra ventana y observa los cambios sin recargar.
+      </div>
+    }
   }
-
 </section>
