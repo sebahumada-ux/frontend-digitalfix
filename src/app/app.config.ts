@@ -39,7 +39,7 @@ const API_SCOPE =
   'api://fad2db65-7d82-41d8-a0c5-2fa1e2512ee4/access_as_user';
 
 const API_GATEWAY =
-  'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com';
+  'https://sgvpknus8k.execute-api.us-east-1.amazonaws.com';
 
 export function msalInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({

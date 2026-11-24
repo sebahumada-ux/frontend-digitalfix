@@ -100,11 +100,11 @@ export class Dashboard implements OnInit, OnDestroy {
       .sort((a, b) => b[1] - a[1])
   );
 
-  private readonly workordersUrl = '/api/workorders';
+  private readonly workordersUrl = 'https://sgvpknus8k.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
   private readonly analyticsUrl = '/api/analytics/resumen';
   private readonly streamUrl = '/api/analytics/stream';
   private readonly catalogUrl =
-    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/catalog/services';
+    'https://sgvpknus8k.execute-api.us-east-1.amazonaws.com/api/bff/catalog/services';
 
   private eventos?: EventSource;
 
