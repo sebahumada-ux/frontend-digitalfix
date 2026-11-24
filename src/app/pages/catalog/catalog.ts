@@ -23,7 +23,7 @@ export class Catalog implements OnInit {
   protected readonly error = signal('');
 
   private readonly apiUrl =
-    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/catalog/services';
+    'https://sgvpknus8k.execute-api.us-east-1.amazonaws.com/api/bff/catalog/services';
 
   constructor(private http: HttpClient) {}
 

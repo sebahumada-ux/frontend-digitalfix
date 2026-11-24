@@ -68,11 +68,9 @@ export class Workorders implements OnInit {
   protected estadoSeleccionado: Record<number, string> = {};
   protected observacionesPorOrden: Record<number, string> = {};
 
-  private readonly apiUrl =
-    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
+  private readonly apiUrl = 'https://sgvpknus8k.execute-api.us-east-1.amazonaws.com/api/bff/workorders';
 
-  private readonly clientesUrl =
-    'https://12up8d8jsh.execute-api.us-east-1.amazonaws.com/api/bff/clientes';
+  private readonly clientesUrl = 'https://sgvpknus8k.execute-api.us-east-1.amazonaws.com/api/bff/clientes';
 
   constructor(
     private http: HttpClient,
